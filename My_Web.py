@@ -7,19 +7,10 @@ import os
 #超像素图像处理库
 import cv2
 import numpy as np
-from scipy.linalg.decomp import eig
-from scipy import sparse
-from scipy.sparse.linalg import eigs
-from skimage import data, segmentation, color
+from skimage import segmentation, color
 from skimage.future import graph
-from matplotlib import pyplot as plt
 from skimage.filters import sobel
-from PIL import Image
-import sys
-import skimage
 from skimage.color import rgb2gray
-from matplotlib.pyplot import figure
-import cv2
 
 SIDEBAR_OPTIONS = ["项目信息", "上传图片", "使用预置图片"]
 DEFAULT_DATA_BASE_DIR = 'D:\graduation project\WEB'
