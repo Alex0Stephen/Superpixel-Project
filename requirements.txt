@@ -1,6 +1,5 @@
 streamlit
 pandas
-os
 opencv-python
 numpy
 skimage
