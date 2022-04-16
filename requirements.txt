@@ -1,6 +1,5 @@
 streamlit
 pandas
-imghdr
 os
 opencv-python
 numpy
