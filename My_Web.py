@@ -13,7 +13,6 @@ from skimage.filters import sobel
 from skimage.color import rgb2gray
 
 SIDEBAR_OPTIONS = ["项目信息", "上传图片", "使用预置图片"]
-DEFAULT_DATA_BASE_DIR = 'D:\graduation project\WEB'
 IMAGE_DIR = 'Image'
 
 def get_file_content_as_string(path):
@@ -153,7 +152,7 @@ if __name__ == '__main__':
         #     st.warning("上传图片失败!")
 
     elif app_mode == "使用预置图片":
-        directory = os.path.join(DEFAULT_DATA_BASE_DIR, IMAGE_DIR)
+        directory = os.path.join(IMAGE_DIR)
 
         photos = []
         for file in os.listdir(directory):
