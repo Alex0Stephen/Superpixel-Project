@@ -38,40 +38,40 @@ def Ncut_Mark_Process(img):
     return out
 
 @st.cache()
-def Watershed_Process(img):
+def Watershed_Process(img, Markers, Compactness):
     gradient = sobel(rgb2gray(img))
-    segments_watershed = segmentation.watershed(gradient, markers=250, compactness=0.001)
+    segments_watershed = segmentation.watershed(gradient, markers = Markers, compactness = Compactness)
     out = color.label2rgb(segments_watershed, img, kind='avg')
     return out
 
 @st.cache()
-def Watershed_Mark_Process(img):
+def Watershed_Mark_Process(img, Markers, Compactness):
     gradient = sobel(rgb2gray(img))
-    segments_watershed = segmentation.watershed(gradient, markers=250, compactness=0.001)
+    segments_watershed = segmentation.watershed(gradient, markers = Markers, compactness = Compactness)
     out = segmentation.mark_boundaries(img, segments_watershed)
     return out
 
 @st.cache()
-def Quickshift_Process(img):
-    segments_quick = segmentation.quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)
+def Quickshift_Process(img, Kernel_size, Max_dist, Ratio):
+    segments_quick = segmentation.quickshift(img, kernel_size = Kernel_size, max_dist = Max_dist, ratio = Ratio)
     out = color.label2rgb(segments_quick, img, kind='avg')
     return out
 
 @st.cache()
-def Quickshift_Mark_Process(img):
-    segments_quick = segmentation.quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)
+def Quickshift_Mark_Process(img, Kernel_size, Max_dist, Ratio):
+    segments_quick = segmentation.quickshift(img, kernel_size = Kernel_size, max_dist = Max_dist, ratio = Ratio)
     out = segmentation.mark_boundaries(img, segments_quick)
     return out
 
 @st.cache()
-def SLIC_Process(img):
-    labels_slic0 = segmentation.slic(img, slic_zero=True)     
+def SLIC_Process(img, N_segments, Compactness):
+    labels_slic0 = segmentation.slic(img, slic_zero=True, n_segments = N_segments, compactness = Compactness)     
     out = color.label2rgb(labels_slic0, img, kind = 'avg')
     return out
 
 @st.cache()
-def SLIC_Mark_Process(img):
-    labels_slic0 = segmentation.slic(img, slic_zero=True)     
+def SLIC_Mark_Process(img, N_segments, Compactness):
+    labels_slic0 = segmentation.slic(img, slic_zero=True, n_segments = N_segments, compactness = Compactness)     
     out = segmentation.mark_boundaries(img, labels_slic0)
     return out
 
@@ -130,23 +130,41 @@ if __name__ == '__main__':
 
            algorithm_type = st.sidebar.selectbox("算法类别：", algorithm_split_names)
            algorithms_type = dtype_algorithm[algorithm_type]
-
-           if algorithms_type == 'ncut':
-                out = Ncut_Process(img)
-                img_boundaries = Ncut_Mark_Process(img)
-                Display_result(out, img_boundaries)
-           elif algorithms_type == 'watershed':
-                out = Watershed_Process(img)
-                img_boundaries = Watershed_Mark_Process(img)
-                Display_result(out, img_boundaries)
+           
+           if algorithms_type == 'watershed':
+                markers = st.sidebar.number_input('标记数：', min_value=1, max_value=1000, value=150)
+                compactness = st.sidebar.number_input('紧凑度：', min_value=0.0, max_value=1.0, value=0.01)
            elif algorithms_type == 'quickshift':
-                out = Quickshift_Process(img)
-                img_boundaries = Quickshift_Mark_Process(img)
-                Display_result(out, img_boundaries)
+                kernel_size = st.sidebar.number_input('核函数宽度（用于平滑样本宽度）：', min_value=1, max_value=10000, value=10)
+                max_dist = st.sidebar.number_input('最大距离（用于控制聚类数量）', min_value=1, max_value=100, value=10)
+                ratio = st.sidebar.number_input('比率（用于平衡色彩空间和图像空间的相似性）：', min_value=0.0, max_value=1.0, value=1.0)
            elif algorithms_type == 'slic':
-                out = SLIC_Process(img)
-                img_boundaries = SLIC_Mark_Process(img)
-                Display_result(out, img_boundaries)
+                n_segments = st.sidebar.number_input('超像素数量：', min_value=1, max_value=10000, value=100)
+                compactness = st.sidebar.number_input('超像素紧凑性：', min_value=0, max_value=100, value=10)
+
+            
+           pressed = st.sidebar.button('确 定')
+
+           if pressed:
+                st.empty()
+                st.sidebar.write('请稍等! 你知道的，这通常需要一点时间。')
+                
+                if algorithms_type == 'ncut':
+                    out = Ncut_Process(img)
+                    img_boundaries = Ncut_Mark_Process(img)
+                    Display_result(out, img_boundaries)
+                elif algorithms_type == 'watershed':
+                    out = Watershed_Process(img, markers, compactness)
+                    img_boundaries = Watershed_Mark_Process(img, markers, compactness)
+                    Display_result(out, img_boundaries)
+                elif algorithms_type == 'quickshift':
+                    out = Quickshift_Process(img, kernel_size, max_dist, ratio)
+                    img_boundaries = Quickshift_Mark_Process(img, kernel_size, max_dist, ratio)
+                    Display_result(out, img_boundaries)
+                elif algorithms_type == 'slic':
+                    out = SLIC_Process(img, n_segments, compactness)
+                    img_boundaries = SLIC_Mark_Process(img, n_segments, compactness)
+                    Display_result(out, img_boundaries)
 
         # else:
         #     st.warning("上传图片失败!")
@@ -178,6 +196,17 @@ if __name__ == '__main__':
         algorithm_type = st.sidebar.selectbox("算法类别：", algorithm_split_names)
         algorithms_type = dtype_algorithm[algorithm_type]
 
+        if algorithms_type == 'watershed':
+                markers = st.sidebar.number_input('标记数：', min_value=1, max_value=1000, value=150)
+                compactness = st.sidebar.number_input('紧凑度：', min_value=0.0, max_value=1.0, value=0.01)
+        elif algorithms_type == 'quickshift':
+                kernel_size = st.sidebar.number_input('核函数宽度（用于平滑样本宽度）：', min_value=1, max_value=10000, value=10)
+                max_dist = st.sidebar.number_input('最大距离（用于控制聚类数量）', min_value=1, max_value=100, value=10)
+                ratio = st.sidebar.number_input('比率（用于平衡色彩空间和图像空间的相似性）：', min_value=0.0, max_value=1.0, value=1.0)
+        elif algorithms_type == 'slic':
+                n_segments = st.sidebar.number_input('超像素数量：', min_value=1, max_value=10000, value=100)
+                compactness = st.sidebar.number_input('超像素紧凑性：', min_value=0, max_value=100, value=10)
+
         pressed = st.sidebar.button('确 定')
 
         if pressed:
@@ -197,16 +226,16 @@ if __name__ == '__main__':
                 img_boundaries = Ncut_Mark_Process(img)
                 Display_result(out, img_boundaries)
             elif algorithms_type == 'watershed':
-                out = Watershed_Process(img)
-                img_boundaries = Watershed_Mark_Process(img)
+                out = Watershed_Process(img, markers, compactness)
+                img_boundaries = Watershed_Mark_Process(img, markers, compactness)
                 Display_result(out, img_boundaries)
             elif algorithms_type == 'quickshift':
-                out = Quickshift_Process(img)
-                img_boundaries = Quickshift_Mark_Process(img)
+                out = Quickshift_Process(img, kernel_size, max_dist, ratio)
+                img_boundaries = Quickshift_Mark_Process(img, kernel_size, max_dist, ratio)
                 Display_result(out, img_boundaries)
             elif algorithms_type == 'slic':
-                out = SLIC_Process(img)
-                img_boundaries = SLIC_Mark_Process(img)
+                out = SLIC_Process(img, n_segments, compactness)
+                img_boundaries = SLIC_Mark_Process(img, n_segments, compactness)
                 Display_result(out, img_boundaries)
 
 
